@@ -71,11 +71,12 @@
 
       if (!src) {
         document.getElementById("gameTitle").textContent = "No game specified";
-      } else if (window.__SHELL) {
-        // running inside the launcher: the CDN may serve the game as plain text
-        FrameWriter.load(frame, src);
       } else {
-        frame.src = src;
+        // Game files are served from jsDelivr (as plain text), so always fetch the
+        // game's HTML and write it into the iframe with a jsDelivr <base href> — that
+        // way its scripts, wasm and images resolve to jsDelivr too. A plain frame.src
+        // would just show the HTML source.
+        FrameWriter.load(frame, src);
       }
 
       document.getElementById("menuBtn").addEventListener("click", () => {
@@ -83,8 +84,7 @@
       });
 
       document.getElementById("refreshBtn").addEventListener("click", () => {
-        if (window.__SHELL) FrameWriter.reload(frame);
-        else frame.src = frame.src;
+        FrameWriter.reload(frame);
       });
 
       const fsBtn = document.getElementById("fullscreenBtn");
