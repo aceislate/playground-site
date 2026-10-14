@@ -73,16 +73,10 @@
       // web page; jsDelivr would only show the source as text).
       //   Branch URL shape:  /gh/USER/REPO/BRANCH/path
       // ============================================================
-      const GH_USER = "aceislate";
-      const GH_REPO = "playground-site";
-      const BRANCH = "main";
-      // app.html is the shell that boots the whole site from jsDelivr. It must be
-      // served from StaticDelivr (it renders as a real page); everything it loads
-      // afterward comes from jsDelivr, whose cache you can purge instantly.
-      const PAGE = "app.html";
-
-      const SITE_URL =
-        `https://cdn.staticdelivr.com/gh/${GH_USER}/${GH_REPO}/${BRANCH}/${PAGE}`;
+      // app.html is the shell that boots the whole site from jsDelivr. It's served
+      // from GitHub Pages (renders as a real page, updates instantly); everything it
+      // loads afterward comes from jsDelivr, whose cache you can purge any time.
+      const SITE_URL = "https://aceislate.github.io/playground-site/app.html";
       // ============================================================
 
       const direct = document.getElementById("direct");
