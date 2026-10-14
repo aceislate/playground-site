@@ -88,12 +88,16 @@
           window.FrameWriter = { load: load, reload: reload, prepare: prepare };
 
           // ---- boot the site from jsDelivr ----
-          var CDN = "https://cdn.jsdelivr.net/gh/aceislate/playground-site@main";
+          // Load everything from the SAME jsDelivr subdomain this SVG was opened
+          // from (cdn / fastly / gcore / testingcf / originfastly / quantil .jsdelivr.net).
+          // So if one subdomain is blocked, just open this file on another one and the
+          // whole site follows — no redeploy. BASE = ".../playground-site@main/".
+          var BASE = new URL(".", location.href).href;
           var frame = document.getElementById("app");
           var boot = document.getElementById("boot");
           var bootMsg = document.getElementById("bootMsg");
           var p = (new URLSearchParams(location.search).get("p") || "index.html").replace(/^\/+/, "");
-          load(frame, CDN + "/" + p, function (err) {
+          load(frame, BASE + p, function (err) {
             if (err) { bootMsg.textContent = "Couldn't load. Refresh to try again."; }
             else { setTimeout(function () { boot.className = "hide"; }, 200); }
           });

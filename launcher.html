@@ -76,9 +76,10 @@
       // app.svg is the shell that boots the whole site from jsDelivr. jsDelivr serves
       // .svg as image/svg+xml, so the browser renders it (unlike .html, served as
       // text); the SVG's foreignObject holds an iframe + FrameWriter that loads the
-      // rest from jsDelivr. Everything — entry included — lives on jsDelivr, whose
-      // cache you can purge any time (purge.jsdelivr.net).
-      const SITE_URL = "https://cdn.jsdelivr.net/gh/aceislate/playground-site@main/app.svg";
+      // rest from the SAME subdomain. Using fastly.jsdelivr.net instead of
+      // cdn.jsdelivr.net (blocked by some antivirus). Other interchangeable mirrors:
+      // gcore / testingcf / originfastly / quantil .jsdelivr.net — just swap the host.
+      const SITE_URL = "https://fastly.jsdelivr.net/gh/aceislate/playground-site@main/app.svg";
       // ============================================================
 
       const direct = document.getElementById("direct");

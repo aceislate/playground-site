@@ -49,7 +49,10 @@
         const m = /\/gh\/([^/]+)\/[^/@]+(?:@([^/]+)|\/([^/]+))\//.exec(document.baseURI);
         if (!m) return p; // not on a GitHub CDN (e.g. local testing)
         const user = m[1], branch = m[2] || m[3] || "main";
-        return `https://cdn.jsdelivr.net/gh/${user}/${gameRepos[folder[1]]}@${branch}/${p}`;
+        // use the same jsDelivr subdomain this page was loaded from, so a blocked
+        // subdomain can be swapped just by changing the URL you open.
+        const origin = new URL(document.baseURI).origin;
+        return `${origin}/gh/${user}/${gameRepos[folder[1]]}@${branch}/${p}`;
       }
 
       function cardHtml(g, i) {
