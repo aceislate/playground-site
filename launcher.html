@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Playground — Launcher</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <style>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      html, body {
+        height: 100%;
+        font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+        background: radial-gradient(circle at 50% 30%, #1a2744 0%, #0a0f1e 70%);
+        color: #e8ecf5;
+      }
+      body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 28px;
+        padding: 24px;
+        text-align: center;
+      }
+      h1 { font-size: clamp(2rem, 6vw, 3.5rem); letter-spacing: -0.02em; }
+      p.sub { color: #9aa7c2; max-width: 32ch; line-height: 1.5; }
+
+      .card {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        width: min(420px, 100%);
+      }
+      label { font-size: 0.85rem; color: #9aa7c2; text-align: left; }
+      select, button {
+        font-size: 1rem;
+        padding: 12px 16px;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        background: #1b2238;
+        color: #e8ecf5;
+        outline: none;
+        cursor: pointer;
+      }
+      button {
+        background: #3a6df0;
+        border: none;
+        font-weight: 600;
+        transition: background 0.15s, transform 0.05s;
+      }
+      button:hover { background: #4f7ef5; }
+      button:active { transform: translateY(1px); }
+      .status { font-size: 0.85rem; color: #9aa7c2; min-height: 1.2em; }
+      a.plain { color: #7fa0ff; }
+    </style>
+  </head>
+  <body>
+    <h1>Playground</h1>
+    <p class="sub">A lightweight games and apps hub. Pick a CDN and launch.</p>
+
+    <div class="card">
+      <div>
+        <label for="cdn">CDN (switch if one is slow or down)</label>
+        <select id="cdn">
+          <option value="https://cdn.staticdelivr.com">cdn.staticdelivr.com (recommended)</option>
+          <option value="https://cdn.jsdelivr.net">cdn.jsdelivr.net</option>
+          <option value="https://fastly.jsdelivr.net">fastly.jsdelivr.net</option>
+          <option value="https://gcore.jsdelivr.net">gcore.jsdelivr.net</option>
+        </select>
+      </div>
+
+      <button id="launch">Launch Playground ↗</button>
+      <button id="launchHere" style="background:#2a3350;">Open in this tab</button>
+      <div class="status" id="status"></div>
+    </div>
+
+    <p class="sub">
+      Direct link:
+      <a class="plain" id="direct" href="#" target="_blank" rel="noopener">open site</a>
+    </p>
+
+    <script>
+      // ============================================================
+      // CONFIG — set these to YOUR repo, then save.
+      //   GH_USER : your GitHub username
+      //   GH_REPO : the site repo (default from upload.ps1)
+      //   BRANCH  : the branch you pushed to (default "main")
+      // ============================================================
+      const GH_USER = "YOUR_GITHUB_USERNAME";
+      const GH_REPO = "playground-site";
+      const BRANCH = "main";
+      const PAGE = "index.html";
+      // ============================================================
+
+      const sel = document.getElementById("cdn");
+      const statusEl = document.getElementById("status");
+      const directLink = document.getElementById("direct");
+
+      function buildUrl() {
+        const base = sel.value;
+        return `${base}/gh/${GH_USER}/${GH_REPO}/${BRANCH}/${PAGE}`;
+      }
+
+      function refresh() {
+        const url = buildUrl();
+        directLink.href = url;
+        if (GH_USER === "YOUR_GITHUB_USERNAME") {
+          statusEl.textContent = "⚠ Set GH_USER in the <script> config before this works.";
+        } else {
+          statusEl.textContent = "";
+        }
+      }
+
+      sel.addEventListener("change", refresh);
+
+      document.getElementById("launch").addEventListener("click", () => {
+        window.open(buildUrl(), "_blank", "noopener");
+      });
+      document.getElementById("launchHere").addEventListener("click", () => {
+        window.location.href = buildUrl();
+      });
+
+      refresh();
+    </script>
+  </body>
+</html>
