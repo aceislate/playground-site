@@ -23,7 +23,7 @@
         text-align: center;
       }
       h1 { font-size: clamp(2rem, 6vw, 3.5rem); letter-spacing: -0.02em; }
-      p.sub { color: #9aa7c2; max-width: 32ch; line-height: 1.5; }
+      p.sub { color: #9aa7c2; max-width: 34ch; line-height: 1.5; }
 
       .card {
         background: rgba(255, 255, 255, 0.05);
@@ -32,99 +32,66 @@
         padding: 24px;
         display: flex;
         flex-direction: column;
-        gap: 16px;
+        gap: 14px;
         width: min(420px, 100%);
       }
-      label { font-size: 0.85rem; color: #9aa7c2; text-align: left; }
-      select, button {
-        font-size: 1rem;
-        padding: 12px 16px;
-        border-radius: 10px;
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        background: #1b2238;
-        color: #e8ecf5;
-        outline: none;
-        cursor: pointer;
-      }
       button {
-        background: #3a6df0;
+        font-size: 1rem;
+        padding: 13px 16px;
+        border-radius: 10px;
         border: none;
+        background: #3a6df0;
+        color: #e8ecf5;
         font-weight: 600;
+        cursor: pointer;
         transition: background 0.15s, transform 0.05s;
       }
       button:hover { background: #4f7ef5; }
       button:active { transform: translateY(1px); }
-      .status { font-size: 0.85rem; color: #9aa7c2; min-height: 1.2em; }
-      a.plain { color: #7fa0ff; }
+      button.secondary { background: #2a3350; }
+      button.secondary:hover { background: #343f63; }
+      a.plain { color: #7fa0ff; word-break: break-all; }
     </style>
   </head>
   <body>
     <h1>Playground</h1>
-    <p class="sub">A lightweight games and apps hub. Pick a CDN and launch.</p>
+    <p class="sub">A lightweight games and apps hub.</p>
 
     <div class="card">
-      <div>
-        <label for="cdn">CDN (switch if one is slow or down)</label>
-        <select id="cdn">
-          <option value="https://cdn.staticdelivr.com">cdn.staticdelivr.com (recommended)</option>
-          <option value="https://cdn.jsdelivr.net">cdn.jsdelivr.net</option>
-          <option value="https://fastly.jsdelivr.net">fastly.jsdelivr.net</option>
-          <option value="https://gcore.jsdelivr.net">gcore.jsdelivr.net</option>
-        </select>
-      </div>
-
       <button id="launch">Launch Playground ↗</button>
-      <button id="launchHere" style="background:#2a3350;">Open in this tab</button>
-      <div class="status" id="status"></div>
+      <button id="launchHere" class="secondary">Open in this tab</button>
     </div>
 
     <p class="sub">
-      Direct link:
-      <a class="plain" id="direct" href="#" target="_blank" rel="noopener">open site</a>
+      Direct link:<br />
+      <a class="plain" id="direct" href="#" target="_blank" rel="noopener"></a>
     </p>
 
     <script>
       // ============================================================
-      // CONFIG — set these to YOUR repo, then save.
-      //   GH_USER : your GitHub username
-      //   GH_REPO : the site repo (default from upload.ps1)
-      //   BRANCH  : the branch you pushed to (default "main")
+      // Your site, served by StaticDelivr (serves .html as a real
+      // web page; jsDelivr would only show the source as text).
+      //   Branch URL shape:  /gh/USER/REPO/BRANCH/path
       // ============================================================
-      const GH_USER = "YOUR_GITHUB_USERNAME";
+      const GH_USER = "aceislate";
       const GH_REPO = "playground-site";
       const BRANCH = "main";
       const PAGE = "index.html";
+
+      const SITE_URL =
+        `https://cdn.staticdelivr.com/gh/${GH_USER}/${GH_REPO}/${BRANCH}/${PAGE}`;
       // ============================================================
 
-      const sel = document.getElementById("cdn");
-      const statusEl = document.getElementById("status");
-      const directLink = document.getElementById("direct");
-
-      function buildUrl() {
-        const base = sel.value;
-        return `${base}/gh/${GH_USER}/${GH_REPO}/${BRANCH}/${PAGE}`;
-      }
-
-      function refresh() {
-        const url = buildUrl();
-        directLink.href = url;
-        if (GH_USER === "YOUR_GITHUB_USERNAME") {
-          statusEl.textContent = "⚠ Set GH_USER in the <script> config before this works.";
-        } else {
-          statusEl.textContent = "";
-        }
-      }
-
-      sel.addEventListener("change", refresh);
+      const direct = document.getElementById("direct");
+      direct.href = SITE_URL;
+      direct.textContent = SITE_URL;
 
       document.getElementById("launch").addEventListener("click", () => {
-        window.open(buildUrl(), "_blank", "noopener");
+        window.open(SITE_URL, "_blank", "noopener");
       });
       document.getElementById("launchHere").addEventListener("click", () => {
-        window.location.href = buildUrl();
+        window.location.href = SITE_URL;
       });
-
-      refresh();
     </script>
   </body>
 </html>

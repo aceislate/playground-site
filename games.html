@@ -36,16 +36,20 @@
       let games = [];
       let gameRepos = {};
 
-      // Game folders are split across several GitHub repos (config/game-repos.json).
-      // When this page is served from a GitHub CDN (.../gh/<user>/<repo>/<branch>/ on
-      // StaticDelivr, .../gh/<user>/<repo>@<branch>/ on jsDelivr), point
-      // projects/<folder>/... at the sibling repo that holds that folder.
-      // Anywhere else (e.g. testing locally) the relative path is used as-is.
+      // Game folders are split across several GitHub repos (config/game-repos.json),
+      // so projects/<folder>/... has to point at the sibling repo that holds it.
+      // Those assets (thumbnails, .wasm, .pak, images, ...) are served from
+      // jsDelivr: StaticDelivr serves binary files with a broken, Location-less
+      // 301 that browsers can't follow, while jsDelivr serves them directly with
+      // open CORS. HTML pages still render fine because FrameWriter fetches them
+      // and writes them into the iframe. Served locally, the relative path is used.
       function gameUrl(p) {
-        const site = /^(https?:\/\/[^/]+\/gh\/[^/]+\/)[^/@]+(@[^/]+|\/[^/]+)\//.exec(document.baseURI);
         const folder = /^projects\/([^/]+)\//.exec(p || "");
-        if (!site || !folder || !gameRepos[folder[1]]) return p;
-        return `${site[1]}${gameRepos[folder[1]]}${site[2]}/${p}`;
+        if (!folder || !gameRepos[folder[1]]) return p;
+        const m = /\/gh\/([^/]+)\/[^/@]+(?:@([^/]+)|\/([^/]+))\//.exec(document.baseURI);
+        if (!m) return p; // not on a GitHub CDN (e.g. local testing)
+        const user = m[1], branch = m[2] || m[3] || "main";
+        return `https://cdn.jsdelivr.net/gh/${user}/${gameRepos[folder[1]]}@${branch}/${p}`;
       }
 
       function cardHtml(g, i) {
