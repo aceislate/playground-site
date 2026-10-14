@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1000" viewBox="0 0 1000 1000" preserveAspectRatio="none">
+  <foreignObject x="0" y="0" width="1000" height="1000">
+    <html xmlns="http://www.w3.org/1999/xhtml" style="width:100%;height:100%;margin:0;padding:0;">
+      <head>
+        <title>Playground</title>
+        <style>
+          /* <![CDATA[ */
+          *{box-sizing:border-box;margin:0;padding:0}
+          html,body{width:100%;height:100%;overflow:hidden;background:#0a0f1e}
+          #app{position:fixed;inset:0;width:100%;height:100%;border:0;background:#0a0f1e}
+          #boot{position:fixed;inset:0;z-index:2;display:flex;align-items:center;justify-content:center;
+                background:radial-gradient(circle at 50% 35%,#1a2744 0%,#0a0f1e 70%);
+                color:#9aa7c2;font:15px system-ui,-apple-system,"Segoe UI",sans-serif;transition:opacity .45s}
+          #boot.hide{opacity:0;pointer-events:none}
+          .spin{width:34px;height:34px;margin-right:12px;border-radius:50%;
+                border:3px solid rgba(255,255,255,.15);border-top-color:#4f7ef5;animation:s .8s linear infinite}
+          @keyframes s{to{transform:rotate(360deg)}}
+          /* ]]> */
+        </style>
+      </head>
+      <body>
+        <iframe id="app" allow="fullscreen; autoplay; gamepad; clipboard-write"
+                allowfullscreen="allowfullscreen"></iframe>
+        <div id="boot"><div class="spin"></div><span id="bootMsg">Loading Playground…</span></div>
+        <script>
+        //<![CDATA[
+        (function () {
+          // Keep the SVG canvas matched to the window so the iframe fills the screen.
+          function size() {
+            var w = window.innerWidth, h = window.innerHeight;
+            var svg = document.querySelector("svg"), fo = document.querySelector("foreignObject");
+            if (svg) { svg.setAttribute("width", w); svg.setAttribute("height", h); svg.setAttribute("viewBox", "0 0 " + w + " " + h); }
+            if (fo) { fo.setAttribute("width", w); fo.setAttribute("height", h); }
+          }
+          size();
+          window.addEventListener("resize", size);
+
+          // ---- FrameWriter (inlined from js/framewriter.js) ----
+          function escScript(s) { return String(s).replace(/<\//g, "<\\/"); }
+          function bootstrap(pageUrl, query) {
+            return "<" + "script>" +
+              "window.__SHELL=true;" +
+              "window.__PAGE_URL=" + escScript(JSON.stringify(pageUrl)) + ";" +
+              "window.__PAGE_QUERY=" + escScript(JSON.stringify(query || "")) + ";" +
+              "window.siteGo=function(u){var t=new URL(u,document.baseURI).href;" +
+              "try{parent.FrameWriter.load(window.frameElement,t);}catch(e){location.href=t;}};" +
+              "document.addEventListener('click',function(e){" +
+              "if(e.defaultPrevented||e.button||e.ctrlKey||e.metaKey||e.shiftKey)return;" +
+              "var a=e.target&&e.target.closest?e.target.closest('a[href]'):null;if(!a)return;" +
+              "var h=a.getAttribute('href');if(!h||h.charAt(0)==='#'||/^(javascript|mailto|data|blob):/i.test(h))return;" +
+              "var u;try{u=new URL(h,document.baseURI);}catch(x){return;}" +
+              "if(u.origin!==new URL(document.baseURI).origin||!/(\\.html?|\\/)$/i.test(u.pathname))return;" +
+              "e.preventDefault();window.siteGo(u.href);},true);" +
+              "<" + "/script>";
+          }
+          function prepare(html, pageUrl, query) {
+            html = String(html || "");
+            var base = pageUrl;
+            var m = html.match(/<base\b[^>]*\bhref\s*=\s*["']?([^"'\s>]+)/i);
+            if (m) { try { base = new URL(m[1], pageUrl).href; } catch (e) {} }
+            html = html.replace(/<base\b[^>]*>/gi, "");
+            html = html.replace(/<meta\b[^>]*http-equiv\s*=\s*["']?refresh[^>]*>/gi, "");
+            var head = '<base href="' + base.replace(/"/g, "&quot;") + '">' + bootstrap(pageUrl, query);
+            if (/<head\b[^>]*>/i.test(html)) return html.replace(/<head\b[^>]*>/i, function (t) { return t + head; });
+            if (/<html\b[^>]*>/i.test(html)) return html.replace(/<html\b[^>]*>/i, function (t) { return t + "<head>" + head + "</head>"; });
+            return head + html;
+          }
+          function errorPage(url, why) {
+            return '<!DOCTYPE html><html><body style="margin:0;height:100vh;display:flex;align-items:center;' +
+              'justify-content:center;background:#111;color:#ddd;font:15px system-ui,sans-serif;text-align:center">' +
+              "<div><p>Couldn't load this page.</p><p style=\"color:#888;font-size:12px\">" +
+              String(why).replace(/</g, "&lt;") + "<br/>" + String(url).replace(/</g, "&lt;") +
+              "</p></div></body></html>";
+          }
+          function load(iframe, url, done) {
+            var full = new URL(url, document.baseURI);
+            var query = full.search; full.search = ""; full.hash = "";
+            var pageUrl = full.href;
+            if (/\/$/.test(full.pathname)) pageUrl += "index.html";
+            iframe.setAttribute("data-fw-url", new URL(url, document.baseURI).href);
+            return fetch(pageUrl)
+              .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.text(); })
+              .then(function (html) { iframe.srcdoc = prepare(html, pageUrl, query); if (done) done(null); })
+              .catch(function (err) { iframe.srcdoc = errorPage(pageUrl, err && err.message ? err.message : err); if (done) done(err); });
+          }
+          function reload(iframe) { var u = iframe.getAttribute("data-fw-url"); if (u) load(iframe, u); }
+          window.FrameWriter = { load: load, reload: reload, prepare: prepare };
+
+          // ---- boot the site from jsDelivr ----
+          var CDN = "https://cdn.jsdelivr.net/gh/aceislate/playground-site@main";
+          var frame = document.getElementById("app");
+          var boot = document.getElementById("boot");
+          var bootMsg = document.getElementById("bootMsg");
+          var p = (new URLSearchParams(location.search).get("p") || "index.html").replace(/^\/+/, "");
+          load(frame, CDN + "/" + p, function (err) {
+            if (err) { bootMsg.textContent = "Couldn't load. Refresh to try again."; }
+            else { setTimeout(function () { boot.className = "hide"; }, 200); }
+          });
+        })();
+        //]]>
+        </script>
+      </body>
+    </html>
+  </foreignObject>
+</svg>

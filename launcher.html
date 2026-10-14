@@ -73,10 +73,12 @@
       // web page; jsDelivr would only show the source as text).
       //   Branch URL shape:  /gh/USER/REPO/BRANCH/path
       // ============================================================
-      // app.html is the shell that boots the whole site from jsDelivr. It's served
-      // from GitHub Pages (renders as a real page, updates instantly); everything it
-      // loads afterward comes from jsDelivr, whose cache you can purge any time.
-      const SITE_URL = "https://aceislate.github.io/playground-site/app.html";
+      // app.svg is the shell that boots the whole site from jsDelivr. jsDelivr serves
+      // .svg as image/svg+xml, so the browser renders it (unlike .html, served as
+      // text); the SVG's foreignObject holds an iframe + FrameWriter that loads the
+      // rest from jsDelivr. Everything — entry included — lives on jsDelivr, whose
+      // cache you can purge any time (purge.jsdelivr.net).
+      const SITE_URL = "https://cdn.jsdelivr.net/gh/aceislate/playground-site@main/app.svg";
       // ============================================================
 
       const direct = document.getElementById("direct");
