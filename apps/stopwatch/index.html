@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/x-icon" href="../../favicon.ico" />
+    <link rel="stylesheet" href="../../css/style.css" />
+    <title>Stopwatch | Playground</title>
+    <style>
+      .time { font-size: 3rem; font-weight: 800; text-align: center; font-variant-numeric: tabular-nums; margin: 1rem 0; }
+      .controls { display: flex; gap: 0.7rem; justify-content: center; margin-bottom: 1rem; }
+      .controls button {
+        cursor: pointer;
+        border: none;
+        border-radius: 10px;
+        padding: 0.7rem 1.4rem;
+        font-weight: 700;
+        color: white;
+      }
+      .start { background: var(--green); color: #06210f; }
+      .stop { background: #ef4444; }
+      .lap { background: var(--purple); }
+      .reset { background: var(--bg-alt); color: var(--text); border: 1px solid var(--border) !important; }
+      ul#laps { list-style: none; padding: 0; margin: 0; max-height: 220px; overflow-y: auto; }
+      ul#laps li { display: flex; justify-content: space-between; padding: 0.4rem 0; border-bottom: 1px solid var(--border); color: var(--text-dim); font-variant-numeric: tabular-nums; }
+    </style>
+  </head>
+  <body>
+    <canvas id="particle-canvas"></canvas>
+    <div class="app-shell">
+      <a href="../../apps.html" class="back-link">&larr; Back to Apps</a>
+      <h1>⏱️ Stopwatch</h1>
+      <div class="app-box">
+        <div class="time" id="time">00:00.00</div>
+        <div class="controls">
+          <button class="start" id="startBtn" onclick="toggle()">Start</button>
+          <button class="lap" onclick="lap()">Lap</button>
+          <button class="reset" onclick="reset()">Reset</button>
+        </div>
+        <ul id="laps"></ul>
+      </div>
+    </div>
+    <nav class="dock">
+      <a href="../../index.html" data-nav="home" aria-label="Home"><span class="icon icon-home"></span></a>
+      <a href="../../games.html" data-nav="games" aria-label="Games"><span class="icon icon-games"></span></a>
+      <a href="../../apps.html" data-nav="apps" aria-label="Apps"><span class="icon icon-apps"></span></a>
+      <a href="../../settings.html" data-nav="settings" aria-label="Settings"><span class="icon icon-settings"></span></a>
+    </nav>
+    <script src="../../js/main.js"></script>
+    <script src="../../js/particles.js"></script>
+    <script>
+      let running = false, startTime = 0, elapsed = 0, raf;
+      const timeEl = document.getElementById("time");
+      const startBtn = document.getElementById("startBtn");
+      const lapsEl = document.getElementById("laps");
+      let lapCount = 0;
+
+      function fmt(ms) {
+        const m = Math.floor(ms / 60000);
+        const s = Math.floor((ms % 60000) / 1000);
+        const cs = Math.floor((ms % 1000) / 10);
+        return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}.${String(cs).padStart(2, "0")}`;
+      }
+
+      function tick() {
+        timeEl.textContent = fmt(Date.now() - startTime + elapsed);
+        if (running) raf = requestAnimationFrame(tick);
+      }
+
+      function toggle() {
+        if (!running) {
+          running = true;
+          startTime = Date.now();
+          startBtn.textContent = "Stop";
+          startBtn.className = "stop";
+          tick();
+        } else {
+          running = false;
+          elapsed += Date.now() - startTime;
+          cancelAnimationFrame(raf);
+          startBtn.textContent = "Start";
+          startBtn.className = "start";
+        }
+      }
+
+      function lap() {
+        lapCount++;
+        const li = document.createElement("li");
+        const current = running ? Date.now() - startTime + elapsed : elapsed;
+        li.innerHTML = `<span>Lap ${lapCount}</span><span>${fmt(current)}</span>`;
+        lapsEl.prepend(li);
+      }
+
+      function reset() {
+        running = false;
+        cancelAnimationFrame(raf);
+        elapsed = 0;
+        lapCount = 0;
+        timeEl.textContent = "00:00.00";
+        startBtn.textContent = "Start";
+        startBtn.className = "start";
+        lapsEl.innerHTML = "";
+      }
+    </script>
+  </body>
+</html>

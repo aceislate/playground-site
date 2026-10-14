@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/x-icon" href="../../favicon.ico" />
+    <link rel="stylesheet" href="../../css/style.css" />
+    <title>Word Counter | Playground</title>
+    <style>
+      textarea#wc-input { min-height: 260px; }
+      .wc-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.8rem; margin-top: 1rem; }
+      .wc-stat { background: var(--bg-alt); border-radius: 10px; padding: 0.8rem; text-align: center; }
+      .wc-stat b { display: block; font-size: 1.4rem; color: var(--green); }
+      .wc-stat span { font-size: 0.8rem; color: var(--text-dim); }
+    </style>
+  </head>
+  <body>
+    <canvas id="particle-canvas"></canvas>
+    <div class="app-shell">
+      <a href="../../apps.html" class="back-link">&larr; Back to Apps</a>
+      <h1>🔢 Word Counter</h1>
+      <div class="app-box">
+        <textarea id="wc-input" placeholder="Paste or type text here..."></textarea>
+        <div class="wc-stats">
+          <div class="wc-stat"><b id="words">0</b><span>Words</span></div>
+          <div class="wc-stat"><b id="chars">0</b><span>Characters</span></div>
+          <div class="wc-stat"><b id="charsNoSpace">0</b><span>Characters (no spaces)</span></div>
+          <div class="wc-stat"><b id="sentences">0</b><span>Sentences</span></div>
+          <div class="wc-stat"><b id="paragraphs">0</b><span>Paragraphs</span></div>
+          <div class="wc-stat"><b id="readTime">0s</b><span>Reading time</span></div>
+        </div>
+      </div>
+    </div>
+    <nav class="dock">
+      <a href="../../index.html" data-nav="home" aria-label="Home"><span class="icon icon-home"></span></a>
+      <a href="../../games.html" data-nav="games" aria-label="Games"><span class="icon icon-games"></span></a>
+      <a href="../../apps.html" data-nav="apps" aria-label="Apps"><span class="icon icon-apps"></span></a>
+      <a href="../../settings.html" data-nav="settings" aria-label="Settings"><span class="icon icon-settings"></span></a>
+    </nav>
+    <script src="../../js/main.js"></script>
+    <script src="../../js/particles.js"></script>
+    <script>
+      const input = document.getElementById("wc-input");
+
+      function update() {
+        const text = input.value;
+        const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+        const chars = text.length;
+        const charsNoSpace = text.replace(/\s/g, "").length;
+        const sentences = (text.match(/[.!?]+/g) || []).length;
+        const paragraphs = text.split(/\n+/).filter((p) => p.trim()).length;
+        const minutes = words / 200;
+        const readTime = minutes < 1 ? Math.round(minutes * 60) + "s" : minutes.toFixed(1) + "m";
+
+        document.getElementById("words").textContent = words;
+        document.getElementById("chars").textContent = chars;
+        document.getElementById("charsNoSpace").textContent = charsNoSpace;
+        document.getElementById("sentences").textContent = sentences;
+        document.getElementById("paragraphs").textContent = paragraphs;
+        document.getElementById("readTime").textContent = readTime;
+      }
+
+      input.addEventListener("input", update);
+      update();
+    </script>
+  </body>
+</html>

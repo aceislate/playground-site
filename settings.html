@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <link rel="stylesheet" href="css/style.css" />
+    <title>Settings | Playground</title>
+  </head>
+  <body>
+    <canvas id="particle-canvas"></canvas>
+
+    <div class="container" style="max-width: 680px;">
+      <h1 class="page-title">Settings</h1>
+
+      <div class="settings-section">
+        <h2>Home screen message</h2>
+        <p class="hint">One line per message &mdash; a random one shows on the home screen each visit. Leave blank to use the defaults.</p>
+        <div class="field">
+          <textarea id="homeMessagesInput" rows="5" placeholder="hey. glad you're here."></textarea>
+        </div>
+        <div style="display:flex; gap:0.6rem; flex-wrap:wrap;">
+          <button id="saveMessagesBtn" class="btn btn-purple" style="padding: 0.6rem 1.2rem; font-size: 0.9rem;">Save</button>
+          <button id="resetMessagesBtn" class="btn btn-ghost" style="padding: 0.6rem 1.2rem; font-size: 0.9rem;">Use defaults</button>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h2>Appearance</h2>
+        <p class="hint">Accent color and background.</p>
+        <div class="setting-row">
+          <div class="label"><b>Accent color</b><span>Used for buttons and links</span></div>
+          <div class="swatch-btns" id="accentSwatches"></div>
+        </div>
+        <div class="setting-row">
+          <div class="label"><b>Floating particles</b><span>Animated background behind every page</span></div>
+          <label class="switch"><input type="checkbox" id="particlesToggle" /><span class="slider"></span></label>
+        </div>
+        <div class="setting-row">
+          <div class="label"><b>Particle density</b><span>Fewer can improve performance</span></div>
+          <select class="select-pill" id="densitySelect">
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+          </select>
+        </div>
+        <div class="setting-row">
+          <div class="label"><b>Reduce motion</b><span>Turns off page animations</span></div>
+          <label class="switch"><input type="checkbox" id="reduceMotionToggle" /><span class="slider"></span></label>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h2>Game player</h2>
+        <p class="hint">Controls for the floating toolbar shown while playing a game.</p>
+        <div class="setting-row">
+          <div class="label"><b>Auto-hide toolbar</b><span>Collapses the controls after a few seconds idle</span></div>
+          <label class="switch"><input type="checkbox" id="autoHideToggle" /><span class="slider"></span></label>
+        </div>
+        <div class="setting-row">
+          <div class="label"><b>Fullscreen on open</b><span>Automatically enter fullscreen when a game loads</span></div>
+          <label class="switch"><input type="checkbox" id="autoFullscreenToggle" /><span class="slider"></span></label>
+        </div>
+        <div class="setting-row">
+          <div class="label"><b>Instant hide-UI hotkey</b><span>Press <b>H</b> anywhere to hide the nav and toolbar</span></div>
+          <span class="pill" style="margin: 0;">Always on</span>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h2>about:blank launcher</h2>
+        <p class="hint">Opens a URL in a blank popup window for extra privacy. Note this doesn't work on every site.</p>
+        <div class="field">
+          <input id="url-target" type="url" placeholder="Enter a website URL" autocomplete="on" />
+        </div>
+        <button id="create" class="btn btn-purple" style="padding: 0.7rem 1.4rem; font-size: 0.9rem;">Open page</button>
+      </div>
+
+      <div class="settings-section">
+        <h2>Tab cloaker</h2>
+        <p class="hint">Change this browser tab's title and icon. Applies across the whole site.</p>
+        <div class="field">
+          <input id="userinput" type="text" placeholder="Enter a title or image URL" autocomplete="off" />
+        </div>
+        <div style="display:flex; gap:0.6rem; flex-wrap:wrap;">
+          <button onclick="changeTabTitle();" class="btn btn-ghost" style="padding: 0.6rem 1.1rem; font-size: 0.85rem;">Set title</button>
+          <button onclick="changeTabIcon();" class="btn btn-ghost" style="padding: 0.6rem 1.1rem; font-size: 0.85rem;">Set icon</button>
+          <button onclick="applyPreset('https://www.google.com/favicon.ico','Google');" class="btn btn-ghost" style="padding: 0.6rem 1.1rem; font-size: 0.85rem;">Google preset</button>
+          <button onclick="resetTabSettings();" class="btn btn-ghost" style="padding: 0.6rem 1.1rem; font-size: 0.85rem;">Reset</button>
+        </div>
+        <p id="console-output" style="margin-top: 0.8rem; font-size: 0.85rem;"></p>
+      </div>
+
+      <div class="settings-section">
+        <h2>Data</h2>
+        <p class="hint">Notes, to-do items, and every setting on this page live in your browser's local storage.</p>
+        <div class="setting-row">
+          <div class="label"><b>Reset all settings</b><span>Restores defaults for appearance and the game player</span></div>
+          <button class="btn btn-ghost" id="resetSettingsBtn" style="padding: 0.55rem 1.1rem; font-size: 0.85rem;">Reset</button>
+        </div>
+        <div class="setting-row">
+          <div class="label"><b>Clear all local data</b><span>Wipes settings, notes, to-do list, and tab cloak</span></div>
+          <button class="btn btn-danger" id="clearDataBtn" style="padding: 0.55rem 1.1rem; font-size: 0.85rem;">Clear everything</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-backdrop" id="confirmModal">
+      <div class="modal">
+        <h3 id="confirmTitle">Are you sure?</h3>
+        <p id="confirmBody" style="color: var(--text-dim); font-size: 0.9rem;"></p>
+        <div class="modal-actions">
+          <button class="btn btn-ghost" id="confirmCancel" style="padding: 0.6rem 1.2rem; font-size: 0.9rem;">Cancel</button>
+          <button class="btn btn-danger" id="confirmOk" style="padding: 0.6rem 1.2rem; font-size: 0.9rem;">Confirm</button>
+        </div>
+      </div>
+    </div>
+
+    <nav class="dock">
+      <a href="index.html" data-nav="home" aria-label="Home"><span class="icon icon-home"></span></a>
+      <a href="games.html" data-nav="games" aria-label="Games"><span class="icon icon-games"></span></a>
+      <a href="apps.html" data-nav="apps" aria-label="Apps"><span class="icon icon-apps"></span></a>
+      <a href="settings.html" data-nav="settings" aria-label="Settings"><span class="icon icon-settings"></span></a>
+    </nav>
+
+    <script src="js/main.js"></script>
+    <script src="js/particles.js"></script>
+    <script src="js/tabcloak.js"></script>
+    <script src="js/homeMessage.js"></script>
+    <script>
+      const messagesInput = document.getElementById("homeMessagesInput");
+      const storedMessages = JSON.parse(localStorage.getItem("s_homeMessages") || "null");
+      messagesInput.value = (storedMessages && storedMessages.length ? storedMessages : window.__defaultHomeMessages).join("\n");
+
+      document.getElementById("saveMessagesBtn").addEventListener("click", () => {
+        const lines = messagesInput.value.split("\n").map((l) => l.trim()).filter(Boolean);
+        if (lines.length) {
+          localStorage.setItem("s_homeMessages", JSON.stringify(lines));
+        } else {
+          localStorage.removeItem("s_homeMessages");
+        }
+      });
+
+      document.getElementById("resetMessagesBtn").addEventListener("click", () => {
+        localStorage.removeItem("s_homeMessages");
+        messagesInput.value = window.__defaultHomeMessages.join("\n");
+      });
+
+      const accentColors = ["#a855f7", "#22c55e", "#3b82f6", "#ec4899", "#f97316", "#ef4444", "#14b8a6"];
+      const swatchWrap = document.getElementById("accentSwatches");
+      const currentAccent = localStorage.getItem("s_accent") || "#a855f7";
+
+      accentColors.forEach((c) => {
+        const b = document.createElement("button");
+        b.className = "swatch-btn" + (c === currentAccent ? " active" : "");
+        b.style.background = c;
+        b.title = c;
+        b.addEventListener("click", () => {
+          localStorage.setItem("s_accent", c);
+          document.querySelectorAll(".swatch-btn").forEach((el) => el.classList.remove("active"));
+          b.classList.add("active");
+          window.__applySiteSettings();
+        });
+        swatchWrap.appendChild(b);
+      });
+
+      const particlesToggle = document.getElementById("particlesToggle");
+      const densitySelect = document.getElementById("densitySelect");
+      const reduceMotionToggle = document.getElementById("reduceMotionToggle");
+      const autoHideToggle = document.getElementById("autoHideToggle");
+      const autoFullscreenToggle = document.getElementById("autoFullscreenToggle");
+
+      particlesToggle.checked = localStorage.getItem("s_particles") !== "off";
+      densitySelect.value = localStorage.getItem("s_particleDensity") || "medium";
+      reduceMotionToggle.checked = localStorage.getItem("s_reduceMotion") === "on";
+      autoHideToggle.checked = localStorage.getItem("s_toolbarAutoHide") !== "off";
+      autoFullscreenToggle.checked = localStorage.getItem("s_autoFullscreen") === "on";
+
+      particlesToggle.addEventListener("change", () => {
+        localStorage.setItem("s_particles", particlesToggle.checked ? "on" : "off");
+        window.__applySiteSettings();
+        window.__restartParticles && window.__restartParticles();
+      });
+      densitySelect.addEventListener("change", () => {
+        localStorage.setItem("s_particleDensity", densitySelect.value);
+        window.__restartParticles && window.__restartParticles();
+      });
+      reduceMotionToggle.addEventListener("change", () => {
+        localStorage.setItem("s_reduceMotion", reduceMotionToggle.checked ? "on" : "off");
+        window.__applySiteSettings();
+      });
+      autoHideToggle.addEventListener("change", () => {
+        localStorage.setItem("s_toolbarAutoHide", autoHideToggle.checked ? "on" : "off");
+      });
+      autoFullscreenToggle.addEventListener("change", () => {
+        localStorage.setItem("s_autoFullscreen", autoFullscreenToggle.checked ? "on" : "off");
+      });
+
+      function showConfirm(title, body, onConfirm) {
+        const modal = document.getElementById("confirmModal");
+        document.getElementById("confirmTitle").textContent = title;
+        document.getElementById("confirmBody").textContent = body;
+        modal.classList.add("open");
+        const okBtn = document.getElementById("confirmOk");
+        const cancelBtn = document.getElementById("confirmCancel");
+        const cleanup = () => {
+          modal.classList.remove("open");
+          okBtn.removeEventListener("click", onOk);
+          cancelBtn.removeEventListener("click", onCancel);
+        };
+        const onOk = () => { cleanup(); onConfirm(); };
+        const onCancel = () => cleanup();
+        okBtn.addEventListener("click", onOk);
+        cancelBtn.addEventListener("click", onCancel);
+      }
+
+      document.getElementById("resetSettingsBtn").addEventListener("click", () => {
+        showConfirm("Reset settings?", "Appearance and game player settings will go back to defaults.", () => {
+          ["s_accent", "s_particles", "s_particleDensity", "s_reduceMotion", "s_toolbarAutoHide", "s_autoFullscreen"].forEach((k) => localStorage.removeItem(k));
+          location.reload();
+        });
+      });
+
+      document.getElementById("clearDataBtn").addEventListener("click", () => {
+        showConfirm("Clear all local data?", "This removes every setting, your notes, to-do list, and tab cloak. This can't be undone.", () => {
+          localStorage.clear();
+          location.reload();
+        });
+      });
+    </script>
+  </body>
+</html>

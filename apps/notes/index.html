@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/x-icon" href="../../favicon.ico" />
+    <link rel="stylesheet" href="../../css/style.css" />
+    <title>Notes | Playground</title>
+    <style>
+      textarea#note {
+        min-height: 320px;
+        resize: vertical;
+        line-height: 1.5;
+      }
+      .status {
+        font-size: 0.8rem;
+        color: var(--text-dim);
+        margin-top: 0.5rem;
+        text-align: right;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="particle-canvas"></canvas>
+    <div class="app-shell">
+      <a href="../../apps.html" class="back-link">&larr; Back to Apps</a>
+      <h1>📝 Notes</h1>
+      <div class="app-box">
+        <textarea id="note" placeholder="Start typing... your notes save automatically."></textarea>
+        <div class="status" id="status">Saved</div>
+      </div>
+    </div>
+    <nav class="dock">
+      <a href="../../index.html" data-nav="home" aria-label="Home"><span class="icon icon-home"></span></a>
+      <a href="../../games.html" data-nav="games" aria-label="Games"><span class="icon icon-games"></span></a>
+      <a href="../../apps.html" data-nav="apps" aria-label="Apps"><span class="icon icon-apps"></span></a>
+      <a href="../../settings.html" data-nav="settings" aria-label="Settings"><span class="icon icon-settings"></span></a>
+    </nav>
+    <script src="../../js/main.js"></script>
+    <script src="../../js/particles.js"></script>
+    <script>
+      const note = document.getElementById("note");
+      const status = document.getElementById("status");
+      note.value = localStorage.getItem("app_notes") || "";
+      let t;
+      note.addEventListener("input", () => {
+        status.textContent = "Saving...";
+        clearTimeout(t);
+        t = setTimeout(() => {
+          localStorage.setItem("app_notes", note.value);
+          status.textContent = "Saved";
+        }, 300);
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/x-icon" href="../../favicon.ico" />
+    <link rel="stylesheet" href="../../css/style.css" />
+    <title>Countdown Timer | Playground</title>
+    <style>
+      .time { font-size: 3rem; font-weight: 800; text-align: center; font-variant-numeric: tabular-nums; margin: 1rem 0; }
+      .time.done { color: #ef4444; }
+      .controls { display: flex; gap: 0.7rem; justify-content: center; }
+      .controls button {
+        cursor: pointer;
+        border: none;
+        border-radius: 10px;
+        padding: 0.7rem 1.4rem;
+        font-weight: 700;
+        color: white;
+      }
+      .start { background: var(--green); color: #06210f; }
+      .stop { background: #ef4444; }
+      .reset { background: var(--bg-alt); color: var(--text); border: 1px solid var(--border) !important; }
+    </style>
+  </head>
+  <body>
+    <canvas id="particle-canvas"></canvas>
+    <div class="app-shell">
+      <a href="../../apps.html" class="back-link">&larr; Back to Apps</a>
+      <h1>⏳ Countdown Timer</h1>
+      <div class="app-box">
+        <div class="row field">
+          <div><label for="mins">Minutes</label><input type="number" id="mins" value="5" min="0" /></div>
+          <div><label for="secs">Seconds</label><input type="number" id="secs" value="0" min="0" max="59" /></div>
+        </div>
+        <div class="time" id="time">05:00</div>
+        <div class="controls">
+          <button class="start" id="startBtn" onclick="toggle()">Start</button>
+          <button class="reset" onclick="reset()">Reset</button>
+        </div>
+      </div>
+    </div>
+    <nav class="dock">
+      <a href="../../index.html" data-nav="home" aria-label="Home"><span class="icon icon-home"></span></a>
+      <a href="../../games.html" data-nav="games" aria-label="Games"><span class="icon icon-games"></span></a>
+      <a href="../../apps.html" data-nav="apps" aria-label="Apps"><span class="icon icon-apps"></span></a>
+      <a href="../../settings.html" data-nav="settings" aria-label="Settings"><span class="icon icon-settings"></span></a>
+    </nav>
+    <script src="../../js/main.js"></script>
+    <script src="../../js/particles.js"></script>
+    <script>
+      let remaining = 300, interval = null, running = false;
+      const timeEl = document.getElementById("time");
+      const startBtn = document.getElementById("startBtn");
+      const minsInput = document.getElementById("mins");
+      const secsInput = document.getElementById("secs");
+
+      function fmt(total) {
+        const m = Math.floor(total / 60);
+        const s = total % 60;
+        return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+      }
+
+      function beep() {
+        try {
+          const ctx = new (window.AudioContext || window.webkitAudioContext)();
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.frequency.value = 880;
+          gain.gain.setValueAtTime(0.2, ctx.currentTime);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.4);
+        } catch (e) {}
+      }
+
+      function toggle() {
+        if (!running) {
+          if (remaining <= 0) {
+            remaining = (parseInt(minsInput.value) || 0) * 60 + (parseInt(secsInput.value) || 0);
+          }
+          if (remaining <= 0) return;
+          running = true;
+          startBtn.textContent = "Pause";
+          startBtn.className = "stop";
+          timeEl.classList.remove("done");
+          interval = setInterval(() => {
+            remaining--;
+            timeEl.textContent = fmt(Math.max(remaining, 0));
+            if (remaining <= 0) {
+              clearInterval(interval);
+              running = false;
+              startBtn.textContent = "Start";
+              startBtn.className = "start";
+              timeEl.classList.add("done");
+              beep();
+            }
+          }, 1000);
+        } else {
+          running = false;
+          clearInterval(interval);
+          startBtn.textContent = "Resume";
+          startBtn.className = "start";
+        }
+      }
+
+      function reset() {
+        running = false;
+        clearInterval(interval);
+        remaining = (parseInt(minsInput.value) || 0) * 60 + (parseInt(secsInput.value) || 0);
+        timeEl.textContent = fmt(remaining);
+        timeEl.classList.remove("done");
+        startBtn.textContent = "Start";
+        startBtn.className = "start";
+      }
+
+      [minsInput, secsInput].forEach((el) => el.addEventListener("input", reset));
+      reset();
+    </script>
+  </body>
+</html>

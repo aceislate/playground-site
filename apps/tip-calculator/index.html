@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/x-icon" href="../../favicon.ico" />
+    <link rel="stylesheet" href="../../css/style.css" />
+    <title>Tip Calculator | Playground</title>
+    <style>
+      .tip-btns { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+      .tip-btns button {
+        flex: 1;
+        cursor: pointer;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: var(--bg-alt);
+        color: var(--text);
+        padding: 0.6rem 0;
+      }
+      .tip-btns button.active { background: var(--purple); border-color: var(--purple); color: white; }
+      .results { margin-top: 1rem; }
+      .results .line { display: flex; justify-content: space-between; padding: 0.4rem 0; border-bottom: 1px solid var(--border); }
+      .results .line:last-child { border-bottom: none; font-weight: 700; color: var(--green); font-size: 1.1rem; }
+    </style>
+  </head>
+  <body>
+    <canvas id="particle-canvas"></canvas>
+    <div class="app-shell">
+      <a href="../../apps.html" class="back-link">&larr; Back to Apps</a>
+      <h1>💵 Tip Calculator</h1>
+      <div class="app-box">
+        <div class="field"><label for="bill">Bill amount</label><input type="number" id="bill" value="50" oninput="calc()" /></div>
+        <div class="field">
+          <label>Tip percentage</label>
+          <div class="tip-btns" id="tipBtns">
+            <button onclick="setTip(10)">10%</button>
+            <button onclick="setTip(15)">15%</button>
+            <button class="active" onclick="setTip(18)">18%</button>
+            <button onclick="setTip(20)">20%</button>
+          </div>
+          <input type="number" id="customTip" value="18" oninput="setTip(parseFloat(this.value)||0, true)" />
+        </div>
+        <div class="field"><label for="people">Split between</label><input type="number" id="people" value="1" min="1" oninput="calc()" /></div>
+        <div class="results">
+          <div class="line"><span>Tip amount</span><span id="tipAmount">$0.00</span></div>
+          <div class="line"><span>Total</span><span id="totalAmount">$0.00</span></div>
+          <div class="line"><span>Per person</span><span id="perPerson">$0.00</span></div>
+        </div>
+      </div>
+    </div>
+    <nav class="dock">
+      <a href="../../index.html" data-nav="home" aria-label="Home"><span class="icon icon-home"></span></a>
+      <a href="../../games.html" data-nav="games" aria-label="Games"><span class="icon icon-games"></span></a>
+      <a href="../../apps.html" data-nav="apps" aria-label="Apps"><span class="icon icon-apps"></span></a>
+      <a href="../../settings.html" data-nav="settings" aria-label="Settings"><span class="icon icon-settings"></span></a>
+    </nav>
+    <script src="../../js/main.js"></script>
+    <script src="../../js/particles.js"></script>
+    <script>
+      let tipPercent = 18;
+
+      function setTip(v, fromInput) {
+        tipPercent = v;
+        if (!fromInput) document.getElementById("customTip").value = v;
+        document.querySelectorAll("#tipBtns button").forEach((b) => b.classList.remove("active"));
+        document.querySelectorAll("#tipBtns button").forEach((b) => {
+          if (parseInt(b.textContent) === v) b.classList.add("active");
+        });
+        calc();
+      }
+
+      function calc() {
+        const bill = parseFloat(document.getElementById("bill").value) || 0;
+        const people = Math.max(parseInt(document.getElementById("people").value) || 1, 1);
+        const tip = bill * (tipPercent / 100);
+        const total = bill + tip;
+        document.getElementById("tipAmount").textContent = "$" + tip.toFixed(2);
+        document.getElementById("totalAmount").textContent = "$" + total.toFixed(2);
+        document.getElementById("perPerson").textContent = "$" + (total / people).toFixed(2);
+      }
+
+      calc();
+    </script>
+  </body>
+</html>

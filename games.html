@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <link rel="stylesheet" href="css/style.css" />
+    <title>Games | Playground</title>
+    <meta name="description" content="Browse and search a huge library of browser games." />
+  </head>
+  <body>
+    <canvas id="particle-canvas"></canvas>
+
+    <div class="container">
+      <div class="page-head"><h1 class="page-title">Games</h1><span class="pill" id="count-pill"></span></div>
+<label class="search-wrap"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="text" id="search" class="search-bar" placeholder="Search" autocomplete="off" /></label>
+      <div id="loader" class="loader"></div>
+      <div id="game-container" class="grid"></div>
+      <p id="empty-msg" class="empty-msg" style="display:none;">No games matched your search.</p>
+    </div>
+
+    <button id="back-to-top" style="display: none;">&uarr;</button>
+
+    <a href="secret.html" aria-hidden="true" tabindex="-1" style="position:fixed;bottom:0;right:0;width:14px;height:14px;opacity:0.02;z-index:9999;"></a>
+
+    <nav class="dock">
+      <a href="index.html" data-nav="home" aria-label="Home"><span class="icon icon-home"></span></a>
+      <a href="games.html" data-nav="games" aria-label="Games"><span class="icon icon-games"></span></a>
+      <a href="apps.html" data-nav="apps" aria-label="Apps"><span class="icon icon-apps"></span></a>
+      <a href="settings.html" data-nav="settings" aria-label="Settings"><span class="icon icon-settings"></span></a>
+    </nav>
+
+    <script src="js/main.js"></script>
+    <script src="js/particles.js"></script>
+    <script>
+      let games = [];
+      let gameRepos = {};
+
+      // Game folders are split across several GitHub repos (config/game-repos.json).
+      // When this page is served from a GitHub CDN (.../gh/<user>/<repo>/<branch>/ on
+      // StaticDelivr, .../gh/<user>/<repo>@<branch>/ on jsDelivr), point
+      // projects/<folder>/... at the sibling repo that holds that folder.
+      // Anywhere else (e.g. testing locally) the relative path is used as-is.
+      function gameUrl(p) {
+        const site = /^(https?:\/\/[^/]+\/gh\/[^/]+\/)[^/@]+(@[^/]+|\/[^/]+)\//.exec(document.baseURI);
+        const folder = /^projects\/([^/]+)\//.exec(p || "");
+        if (!site || !folder || !gameRepos[folder[1]]) return p;
+        return `${site[1]}${gameRepos[folder[1]]}${site[2]}/${p}`;
+      }
+
+      function cardHtml(g, i) {
+        const isExternal = g.external === true || /^https?:\/\//i.test(g.link);
+        const href = isExternal
+          ? g.link
+          : `play.html?src=${encodeURIComponent(gameUrl(g.link))}&title=${encodeURIComponent(g.title)}&img=${encodeURIComponent(gameUrl(g.imgSrc))}`;
+        const target = isExternal ? ' target="_blank" rel="noopener noreferrer"' : "";
+
+        return `<a class="card-link" style="--i:${i % 24}" href="${href}"${target}>
+          <div class="card">
+            <div class="card-img-wrap"><img src="${gameUrl(g.imgSrc)}" alt="${g.title}" loading="lazy" /></div>
+            <div class="card-body"><p class="card-title">${g.title}</p></div>
+          </div>
+        </a>`;
+      }
+
+      function render(list) {
+        const container = document.getElementById("game-container");
+        container.innerHTML = list.map(cardHtml).join("");
+        document.getElementById("empty-msg").style.display = list.length ? "none" : "block";
+      }
+
+      function getSecretGames() {
+        if (localStorage.getItem("secretUnlocked") !== "1") return Promise.resolve([]);
+        return fetch("config/secret-games.json")
+          .then((r) => r.json())
+          .catch(() => []);
+      }
+
+      Promise.all([
+        fetch("config/games.json").then((r) => r.json()),
+        getSecretGames(),
+        fetch("config/game-repos.json").then((r) => r.json()).catch(() => ({})),
+      ])
+        .then(([data, secretGames, repos]) => {
+          gameRepos = repos;
+          games = data.concat(secretGames);
+          document.getElementById("count-pill").textContent = `${games.length} games`;
+          render(games);
+          document.getElementById("loader").style.display = "none";
+        })
+        .catch((err) => {
+          document.getElementById("loader").style.display = "none";
+          console.error("Error loading games:", err);
+        });
+
+      document.getElementById("search").addEventListener("keyup", (e) => {
+        const filter = e.target.value.toUpperCase();
+        render(games.filter((g) => g.title.toUpperCase().includes(filter)));
+      });
+
+      const backToTopButton = document.getElementById("back-to-top");
+      window.onscroll = function () {
+        backToTopButton.style.display = document.documentElement.scrollTop > 200 ? "block" : "none";
+      };
+      backToTopButton.onclick = function () {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      };
+    </script>
+  </body>
+</html>

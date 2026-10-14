@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/x-icon" href="../../favicon.ico" />
+    <link rel="stylesheet" href="../../css/style.css" />
+    <title>Unit Converter | Playground</title>
+  </head>
+  <body>
+    <canvas id="particle-canvas"></canvas>
+    <div class="app-shell">
+      <a href="../../apps.html" class="back-link">&larr; Back to Apps</a>
+      <h1>📐 Unit Converter</h1>
+      <div class="app-box">
+        <div class="field">
+          <label for="category">Category</label>
+          <select id="category" onchange="buildUnitOptions()"></select>
+        </div>
+        <div class="row field">
+          <div>
+            <label for="fromVal">From</label>
+            <input type="number" id="fromVal" value="1" oninput="convert()" />
+            <select id="fromUnit" onchange="convert()"></select>
+          </div>
+          <div>
+            <label for="toVal">To</label>
+            <input type="number" id="toVal" readonly />
+            <select id="toUnit" onchange="convert()"></select>
+          </div>
+        </div>
+      </div>
+    </div>
+    <nav class="dock">
+      <a href="../../index.html" data-nav="home" aria-label="Home"><span class="icon icon-home"></span></a>
+      <a href="../../games.html" data-nav="games" aria-label="Games"><span class="icon icon-games"></span></a>
+      <a href="../../apps.html" data-nav="apps" aria-label="Apps"><span class="icon icon-apps"></span></a>
+      <a href="../../settings.html" data-nav="settings" aria-label="Settings"><span class="icon icon-settings"></span></a>
+    </nav>
+    <script src="../../js/main.js"></script>
+    <script src="../../js/particles.js"></script>
+    <script>
+      const units = {
+        Length: {
+          base: "m",
+          factors: { Meters: 1, Kilometers: 1000, Centimeters: 0.01, Millimeters: 0.001, Miles: 1609.344, Yards: 0.9144, Feet: 0.3048, Inches: 0.0254 },
+        },
+        Weight: {
+          base: "kg",
+          factors: { Kilograms: 1, Grams: 0.001, Milligrams: 0.000001, Pounds: 0.45359237, Ounces: 0.0283495231, Tons: 1000 },
+        },
+        Temperature: { special: true },
+        Volume: {
+          base: "L",
+          factors: { Liters: 1, Milliliters: 0.001, "Cubic Meters": 1000, Gallons: 3.785411784, Quarts: 0.946352946, Pints: 0.473176473, Cups: 0.2365882365 },
+        },
+        Speed: {
+          base: "mps",
+          factors: { "Meters/sec": 1, "Kilometers/hr": 0.277778, "Miles/hr": 0.44704, Knots: 0.514444 },
+        },
+        Data: {
+          base: "B",
+          factors: { Bytes: 1, Kilobytes: 1024, Megabytes: 1024 ** 2, Gigabytes: 1024 ** 3, Terabytes: 1024 ** 4 },
+        },
+      };
+
+      const categorySelect = document.getElementById("category");
+      const fromUnit = document.getElementById("fromUnit");
+      const toUnit = document.getElementById("toUnit");
+
+      Object.keys(units).forEach((c) => {
+        const opt = document.createElement("option");
+        opt.value = c;
+        opt.textContent = c;
+        categorySelect.appendChild(opt);
+      });
+
+      function buildUnitOptions() {
+        const cat = units[categorySelect.value];
+        fromUnit.innerHTML = "";
+        toUnit.innerHTML = "";
+        const names = cat.special ? ["Celsius", "Fahrenheit", "Kelvin"] : Object.keys(cat.factors);
+        names.forEach((n) => {
+          fromUnit.appendChild(new Option(n, n));
+          toUnit.appendChild(new Option(n, n));
+        });
+        toUnit.selectedIndex = names.length > 1 ? 1 : 0;
+        convert();
+      }
+
+      function convertTemp(value, from, to) {
+        let celsius;
+        if (from === "Celsius") celsius = value;
+        else if (from === "Fahrenheit") celsius = (value - 32) * (5 / 9);
+        else celsius = value - 273.15;
+
+        if (to === "Celsius") return celsius;
+        if (to === "Fahrenheit") return celsius * (9 / 5) + 32;
+        return celsius + 273.15;
+      }
+
+      function convert() {
+        const cat = units[categorySelect.value];
+        const fromVal = parseFloat(document.getElementById("fromVal").value);
+        const toValEl = document.getElementById("toVal");
+        if (Number.isNaN(fromVal)) {
+          toValEl.value = "";
+          return;
+        }
+        let result;
+        if (cat.special) {
+          result = convertTemp(fromVal, fromUnit.value, toUnit.value);
+        } else {
+          const base = fromVal * cat.factors[fromUnit.value];
+          result = base / cat.factors[toUnit.value];
+        }
+        toValEl.value = Math.round(result * 1e6) / 1e6;
+      }
+
+      buildUnitOptions();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <link rel="stylesheet" href="css/style.css" />
+    <title>Playing... | Playground</title>
+  </head>
+  <body class="player-page">
+    <canvas id="particle-canvas" style="z-index: -1;"></canvas>
+
+    <div class="player-frame-wrap">
+      <iframe
+        id="gameFrame"
+        src=""
+        allow="fullscreen; autoplay; gamepad; clipboard-write"
+        allowfullscreen
+        referrerpolicy="no-referrer"
+      ></iframe>
+    </div>
+
+    <div class="show-ui-fab" id="showUiFab" title="Show controls"></div>
+
+    <div class="player-toolbar" id="toolbar">
+      <button class="tool-btn" id="menuBtn" title="Back to menu" aria-label="Back"><svg class="ico" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></button>
+      <button class="tool-btn" id="refreshBtn" title="Refresh game" aria-label="Refresh"><svg class="ico" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.6-6.4"/><path d="M21 4v5h-5"/></svg></button>
+      <span class="title" id="gameTitle">Loading...</span>
+      <button class="tool-btn" id="fullscreenBtn" title="Fullscreen" aria-label="Fullscreen"><svg class="ico ico-on" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/></svg><svg class="ico ico-off" viewBox="0 0 24 24"><path d="M3 8h3a2 2 0 0 0 2-2V3M21 8h-3a2 2 0 0 1-2-2V3M3 16h3a2 2 0 0 1 2 2v3M21 16h-3a2 2 0 0 0-2 2v3"/></svg></button>
+      <button class="tool-btn" id="settingsBtn" title="Quick settings"><span class="icon icon-settings"></span></button>
+      <button class="tool-btn" id="hideBtn" title="Hide controls (H)"><span class="icon icon-close"></span></button>
+    </div>
+
+    <div class="modal-backdrop" id="quickSettingsModal">
+      <div class="modal">
+        <h3>Quick settings</h3>
+        <div class="setting-row">
+          <div class="label"><b>Auto-hide toolbar</b><span>Hides after a few seconds idle</span></div>
+          <label class="switch"><input type="checkbox" id="autoHideToggle" /><span class="slider"></span></label>
+        </div>
+        <div class="setting-row">
+          <div class="label"><b>Particle background</b><span>Animated dots behind the game</span></div>
+          <label class="switch"><input type="checkbox" id="particlesToggle" /><span class="slider"></span></label>
+        </div>
+        <div class="setting-row">
+          <div class="label"><b>Fullscreen on open</b><span>Auto-enter fullscreen for new games</span></div>
+          <label class="switch"><input type="checkbox" id="autoFullscreenToggle" /><span class="slider"></span></label>
+        </div>
+        <p style="font-size: 0.8rem; color: var(--text-dim);">Tip: press <b>H</b> anytime to instantly hide or show all controls.</p>
+        <div class="modal-actions">
+          <a href="settings.html" target="_blank" class="btn btn-ghost" style="padding: 0.6rem 1.2rem; font-size: 0.9rem;">More settings</a>
+          <button class="btn btn-purple" id="closeModalBtn" style="padding: 0.6rem 1.2rem; font-size: 0.9rem;">Done</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="js/main.js"></script>
+    <script src="js/particles.js"></script>
+    <script src="js/framewriter.js"></script>
+    <script>
+      // inside the launcher this page has no real URL, so the query comes from the loader
+      const params = new URLSearchParams(window.__PAGE_QUERY || location.search);
+      const src = params.get("src");
+      const title = params.get("title") || "Game";
+      const frame = document.getElementById("gameFrame");
+      const toolbar = document.getElementById("toolbar");
+      const showUiFab = document.getElementById("showUiFab");
+
+      document.getElementById("gameTitle").textContent = title;
+      document.title = `${title} | Playground`;
+
+      if (!src) {
+        document.getElementById("gameTitle").textContent = "No game specified";
+      } else if (window.__SHELL) {
+        // running inside the launcher: the CDN may serve the game as plain text
+        FrameWriter.load(frame, src);
+      } else {
+        frame.src = src;
+      }
+
+      document.getElementById("menuBtn").addEventListener("click", () => {
+        (window.siteGo || function (u) { location.href = u; })("games.html");
+      });
+
+      document.getElementById("refreshBtn").addEventListener("click", () => {
+        if (window.__SHELL) FrameWriter.reload(frame);
+        else frame.src = frame.src;
+      });
+
+      const fsBtn = document.getElementById("fullscreenBtn");
+      function toggleFullscreen() {
+        if (!document.fullscreenElement) {
+          document.querySelector(".player-frame-wrap").requestFullscreen().catch(() => {});
+        } else {
+          document.exitFullscreen().catch(() => {});
+        }
+      }
+      fsBtn.addEventListener("click", toggleFullscreen);
+      document.addEventListener("fullscreenchange", () => {
+        fsBtn.classList.toggle("on", !!document.fullscreenElement);
+      });
+
+      document.getElementById("hideBtn").addEventListener("click", () => {
+        document.documentElement.classList.toggle("hide-ui");
+      });
+
+      showUiFab.addEventListener("click", () => {
+        document.documentElement.classList.remove("hide-ui");
+      });
+
+      // quick settings modal
+      const modal = document.getElementById("quickSettingsModal");
+      const autoHideToggle = document.getElementById("autoHideToggle");
+      const particlesToggle = document.getElementById("particlesToggle");
+      const autoFullscreenToggle = document.getElementById("autoFullscreenToggle");
+
+      autoHideToggle.checked = localStorage.getItem("s_toolbarAutoHide") !== "off";
+      particlesToggle.checked = localStorage.getItem("s_particles") !== "off";
+      autoFullscreenToggle.checked = localStorage.getItem("s_autoFullscreen") === "on";
+
+      document.getElementById("settingsBtn").addEventListener("click", () => modal.classList.add("open"));
+      document.getElementById("closeModalBtn").addEventListener("click", () => modal.classList.remove("open"));
+      modal.addEventListener("click", (e) => { if (e.target === modal) modal.classList.remove("open"); });
+
+      autoHideToggle.addEventListener("change", () => {
+        localStorage.setItem("s_toolbarAutoHide", autoHideToggle.checked ? "on" : "off");
+        resetIdleTimer();
+      });
+      particlesToggle.addEventListener("change", () => {
+        localStorage.setItem("s_particles", particlesToggle.checked ? "on" : "off");
+        window.__applySiteSettings && window.__applySiteSettings();
+        window.__restartParticles && window.__restartParticles();
+      });
+      autoFullscreenToggle.addEventListener("change", () => {
+        localStorage.setItem("s_autoFullscreen", autoFullscreenToggle.checked ? "on" : "off");
+      });
+
+      // auto-hide toolbar on idle
+      let idleTimer = null;
+      function collapseToolbar() {
+        if (localStorage.getItem("s_toolbarAutoHide") === "off") return;
+        if (modal.classList.contains("open")) return;
+        toolbar.classList.add("collapsed");
+        showUiFab.classList.add("visible");
+      }
+      function resetIdleTimer() {
+        toolbar.classList.remove("collapsed");
+        clearTimeout(idleTimer);
+        if (localStorage.getItem("s_toolbarAutoHide") !== "off") {
+          idleTimer = setTimeout(collapseToolbar, 6000);
+        }
+      }
+      ["mousemove", "touchstart", "keydown", "click", "wheel"].forEach((ev) => window.addEventListener(ev, resetIdleTimer));
+      toolbar.addEventListener("mouseenter", () => clearTimeout(idleTimer));
+      toolbar.addEventListener("mouseleave", resetIdleTimer);
+      resetIdleTimer();
+
+      if (localStorage.getItem("s_autoFullscreen") === "on") {
+        setTimeout(() => {
+          document.querySelector(".player-frame-wrap").requestFullscreen().catch(() => {});
+        }, 300);
+      }
+    </script>
+  </body>
+</html>

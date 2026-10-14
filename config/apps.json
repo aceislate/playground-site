@@ -1,0 +1,104 @@
+[
+  {
+    "link": "apps/ai-chat/index.html",
+    "imgSrc": "apps/ai-chat/icon.svg",
+    "title": "AI Chat",
+    "desc": "Chat with an AI, proxied through your own Cloudflare Worker."
+  },
+  {
+    "link": "apps/calculator/index.html",
+    "imgSrc": "apps/calculator/icon.svg",
+    "title": "Calculator",
+    "desc": "A full-featured calculator for everyday math."
+  },
+  {
+    "link": "apps/notes/index.html",
+    "imgSrc": "apps/notes/icon.svg",
+    "title": "Notes",
+    "desc": "Quick notes that save automatically in your browser."
+  },
+  {
+    "link": "apps/todo/index.html",
+    "imgSrc": "apps/todo/icon.svg",
+    "title": "To-Do List",
+    "desc": "Track tasks with a simple, persistent checklist."
+  },
+  {
+    "link": "apps/unit-converter/index.html",
+    "imgSrc": "apps/unit-converter/icon.svg",
+    "title": "Unit Converter",
+    "desc": "Convert length, weight, temperature, and more."
+  },
+  {
+    "link": "apps/stopwatch/index.html",
+    "imgSrc": "apps/stopwatch/icon.svg",
+    "title": "Stopwatch",
+    "desc": "Stopwatch with lap tracking."
+  },
+  {
+    "link": "apps/countdown-timer/index.html",
+    "imgSrc": "apps/countdown-timer/icon.svg",
+    "title": "Countdown Timer",
+    "desc": "Set a timer and get an on-screen + sound alert."
+  },
+  {
+    "link": "apps/color-picker/index.html",
+    "imgSrc": "apps/color-picker/icon.svg",
+    "title": "Color Picker",
+    "desc": "Pick colors and generate matching palettes."
+  },
+  {
+    "link": "apps/password-generator/index.html",
+    "imgSrc": "apps/password-generator/icon.svg",
+    "title": "Password Generator",
+    "desc": "Generate strong, random passwords."
+  },
+  {
+    "link": "apps/bmi-calculator/index.html",
+    "imgSrc": "apps/bmi-calculator/icon.svg",
+    "title": "BMI Calculator",
+    "desc": "Calculate your Body Mass Index."
+  },
+  {
+    "link": "apps/typing-test/index.html",
+    "imgSrc": "apps/typing-test/icon.svg",
+    "title": "Typing Test",
+    "desc": "Measure your typing speed (WPM) and accuracy."
+  },
+  {
+    "link": "apps/markdown-previewer/index.html",
+    "imgSrc": "apps/markdown-previewer/icon.svg",
+    "title": "Markdown Previewer",
+    "desc": "Write Markdown and preview it live."
+  },
+  {
+    "link": "apps/tip-calculator/index.html",
+    "imgSrc": "apps/tip-calculator/icon.svg",
+    "title": "Tip Calculator",
+    "desc": "Split the bill and calculate the tip."
+  },
+  {
+    "link": "apps/dice-roller/index.html",
+    "imgSrc": "apps/dice-roller/icon.svg",
+    "title": "Dice Roller",
+    "desc": "Roll customizable dice for games."
+  },
+  {
+    "link": "apps/word-counter/index.html",
+    "imgSrc": "apps/word-counter/icon.svg",
+    "title": "Word Counter",
+    "desc": "Count words, characters, and reading time."
+  },
+  {
+    "link": "apps/age-calculator/index.html",
+    "imgSrc": "apps/age-calculator/icon.svg",
+    "title": "Age Calculator",
+    "desc": "Find your exact age in years, months, and days."
+  },
+  {
+    "link": "apps/grade-calculator/index.html",
+    "imgSrc": "apps/grade-calculator/icon.svg",
+    "title": "Grade Calculator",
+    "desc": "Weighted grade and GPA calculator."
+  }
+]

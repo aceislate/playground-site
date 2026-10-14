@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/x-icon" href="../../favicon.ico" />
+    <link rel="stylesheet" href="../../css/style.css" />
+    <title>To-Do List | Playground</title>
+    <style>
+      .todo-item {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 0.6rem 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .todo-item:last-child { border-bottom: none; }
+      .todo-item span { flex: 1; }
+      .todo-item.done span { text-decoration: line-through; color: var(--text-dim); }
+      .todo-item button {
+        cursor: pointer;
+        background: none;
+        border: none;
+        color: #ff6b6b;
+        font-size: 1.1rem;
+      }
+      .add-row { display: flex; gap: 0.6rem; margin-bottom: 1rem; }
+      .add-row input { flex: 1; }
+      .add-row button {
+        cursor: pointer;
+        border: none;
+        border-radius: 10px;
+        background: var(--green);
+        color: #06210f;
+        font-weight: 700;
+        padding: 0 1.2rem;
+      }
+      .empty { color: var(--text-dim); text-align: center; padding: 1.5rem 0; }
+    </style>
+  </head>
+  <body>
+    <canvas id="particle-canvas"></canvas>
+    <div class="app-shell">
+      <a href="../../apps.html" class="back-link">&larr; Back to Apps</a>
+      <h1>✅ To-Do List</h1>
+      <div class="app-box">
+        <div class="add-row">
+          <input type="text" id="input" placeholder="Add a task..." />
+          <button onclick="addTask()">Add</button>
+        </div>
+        <div id="list"></div>
+      </div>
+    </div>
+    <nav class="dock">
+      <a href="../../index.html" data-nav="home" aria-label="Home"><span class="icon icon-home"></span></a>
+      <a href="../../games.html" data-nav="games" aria-label="Games"><span class="icon icon-games"></span></a>
+      <a href="../../apps.html" data-nav="apps" aria-label="Apps"><span class="icon icon-apps"></span></a>
+      <a href="../../settings.html" data-nav="settings" aria-label="Settings"><span class="icon icon-settings"></span></a>
+    </nav>
+    <script src="../../js/main.js"></script>
+    <script src="../../js/particles.js"></script>
+    <script>
+      const input = document.getElementById("input");
+      const list = document.getElementById("list");
+      let tasks = JSON.parse(localStorage.getItem("app_todo") || "[]");
+
+      function save() {
+        localStorage.setItem("app_todo", JSON.stringify(tasks));
+      }
+
+      function render() {
+        list.innerHTML = "";
+        if (!tasks.length) {
+          list.innerHTML = '<div class="empty">Nothing here yet. Add a task above.</div>';
+          return;
+        }
+        tasks.forEach((t, i) => {
+          const row = document.createElement("div");
+          row.className = "todo-item" + (t.done ? " done" : "");
+          row.innerHTML = `<input type="checkbox" ${t.done ? "checked" : ""} onchange="toggle(${i})" /><span>${escapeHtml(t.text)}</span><button onclick="remove(${i})">✕</button>`;
+          list.appendChild(row);
+        });
+      }
+
+      function escapeHtml(s) {
+        const d = document.createElement("div");
+        d.textContent = s;
+        return d.innerHTML;
+      }
+
+      function addTask() {
+        const v = input.value.trim();
+        if (!v) return;
+        tasks.push({ text: v, done: false });
+        input.value = "";
+        save();
+        render();
+      }
+
+      function toggle(i) {
+        tasks[i].done = !tasks[i].done;
+        save();
+        render();
+      }
+
+      function remove(i) {
+        tasks.splice(i, 1);
+        save();
+        render();
+      }
+
+      input.addEventListener("keyup", (e) => { if (e.key === "Enter") addTask(); });
+      render();
+    </script>
+  </body>
+</html>

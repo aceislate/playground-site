@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/x-icon" href="../../favicon.ico" />
+    <link rel="stylesheet" href="../../css/style.css" />
+    <title>Color Picker | Playground</title>
+    <style>
+      .swatch-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+      input[type="color"] { width: 60px; height: 60px; border: none; border-radius: 12px; padding: 0; background: none; cursor: pointer; }
+      .codes { flex: 1; }
+      .code-line { display: flex; justify-content: space-between; font-family: monospace; padding: 0.2rem 0; color: var(--text-dim); }
+      .code-line b { color: var(--text); }
+      .palette { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.5rem; margin-top: 1.2rem; }
+      .palette div { height: 60px; border-radius: 10px; display: flex; align-items: flex-end; justify-content: center; font-size: 0.7rem; color: rgba(255,255,255,0.85); padding-bottom: 4px; font-family: monospace; }
+    </style>
+  </head>
+  <body>
+    <canvas id="particle-canvas"></canvas>
+    <div class="app-shell">
+      <a href="../../apps.html" class="back-link">&larr; Back to Apps</a>
+      <h1>🎨 Color Picker</h1>
+      <div class="app-box">
+        <div class="swatch-row">
+          <input type="color" id="picker" value="#a855f7" oninput="update()" />
+          <div class="codes">
+            <div class="code-line">HEX <b id="hexVal">#a855f7</b></div>
+            <div class="code-line">RGB <b id="rgbVal"></b></div>
+            <div class="code-line">HSL <b id="hslVal"></b></div>
+          </div>
+        </div>
+        <div>Shades &amp; tints</div>
+        <div class="palette" id="palette"></div>
+      </div>
+    </div>
+    <nav class="dock">
+      <a href="../../index.html" data-nav="home" aria-label="Home"><span class="icon icon-home"></span></a>
+      <a href="../../games.html" data-nav="games" aria-label="Games"><span class="icon icon-games"></span></a>
+      <a href="../../apps.html" data-nav="apps" aria-label="Apps"><span class="icon icon-apps"></span></a>
+      <a href="../../settings.html" data-nav="settings" aria-label="Settings"><span class="icon icon-settings"></span></a>
+    </nav>
+    <script src="../../js/main.js"></script>
+    <script src="../../js/particles.js"></script>
+    <script>
+      const picker = document.getElementById("picker");
+
+      function hexToRgb(hex) {
+        const n = parseInt(hex.slice(1), 16);
+        return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+      }
+
+      function rgbToHsl(r, g, b) {
+        r /= 255; g /= 255; b /= 255;
+        const max = Math.max(r, g, b), min = Math.min(r, g, b);
+        let h, s, l = (max + min) / 2;
+        if (max === min) { h = s = 0; }
+        else {
+          const d = max - min;
+          s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+          switch (max) {
+            case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+            case g: h = (b - r) / d + 2; break;
+            case b: h = (r - g) / d + 4; break;
+          }
+          h /= 6;
+        }
+        return [Math.round(h * 360), Math.round(s * 100), Math.round(l * 100)];
+      }
+
+      function shade(hex, percent) {
+        const [r, g, b] = hexToRgb(hex);
+        const t = percent < 0 ? 0 : 255;
+        const p = Math.abs(percent) / 100;
+        const f = (c) => Math.round((t - c) * p + c);
+        return `#${[f(r), f(g), f(b)].map((v) => v.toString(16).padStart(2, "0")).join("")}`;
+      }
+
+      function update() {
+        const hex = picker.value;
+        const [r, g, b] = hexToRgb(hex);
+        const [h, s, l] = rgbToHsl(r, g, b);
+        document.getElementById("hexVal").textContent = hex;
+        document.getElementById("rgbVal").textContent = `rgb(${r}, ${g}, ${b})`;
+        document.getElementById("hslVal").textContent = `hsl(${h}, ${s}%, ${l}%)`;
+
+        const palette = document.getElementById("palette");
+        palette.innerHTML = "";
+        const steps = [-60, -30, 0, 30, 60];
+        steps.forEach((p) => {
+          const c = shade(hex, p);
+          const div = document.createElement("div");
+          div.style.background = c;
+          div.textContent = c;
+          div.style.cursor = "pointer";
+          div.onclick = () => navigator.clipboard && navigator.clipboard.writeText(c);
+          div.title = "Click to copy";
+          palette.appendChild(div);
+        });
+      }
+
+      update();
+    </script>
+  </body>
+</html>

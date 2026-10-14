@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/x-icon" href="../../favicon.ico" />
+    <link rel="stylesheet" href="../../css/style.css" />
+    <title>Grade Calculator | Playground</title>
+    <style>
+      .grade-row { display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 0.5rem; margin-bottom: 0.5rem; align-items: center; }
+      .grade-row input { padding: 0.5rem 0.7rem; }
+      .grade-row button {
+        cursor: pointer;
+        background: none;
+        border: none;
+        color: #ff6b6b;
+        font-size: 1.1rem;
+      }
+      .add-row-btn {
+        cursor: pointer;
+        border: 1px dashed var(--border);
+        border-radius: 10px;
+        background: none;
+        color: var(--text-dim);
+        padding: 0.5rem;
+        width: 100%;
+        margin-top: 0.5rem;
+      }
+      .headers { display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 0.5rem; font-size: 0.75rem; color: var(--text-dim); margin-bottom: 0.4rem; }
+    </style>
+  </head>
+  <body>
+    <canvas id="particle-canvas"></canvas>
+    <div class="app-shell">
+      <a href="../../apps.html" class="back-link">&larr; Back to Apps</a>
+      <h1>🎓 Grade Calculator</h1>
+      <div class="app-box">
+        <div class="headers"><span>Assignment</span><span>Score (%)</span><span>Weight (%)</span><span></span></div>
+        <div id="rows"></div>
+        <button class="add-row-btn" onclick="addRow()">+ Add assignment</button>
+        <div class="result" id="result">--</div>
+      </div>
+    </div>
+    <nav class="dock">
+      <a href="../../index.html" data-nav="home" aria-label="Home"><span class="icon icon-home"></span></a>
+      <a href="../../games.html" data-nav="games" aria-label="Games"><span class="icon icon-games"></span></a>
+      <a href="../../apps.html" data-nav="apps" aria-label="Apps"><span class="icon icon-apps"></span></a>
+      <a href="../../settings.html" data-nav="settings" aria-label="Settings"><span class="icon icon-settings"></span></a>
+    </nav>
+    <script src="../../js/main.js"></script>
+    <script src="../../js/particles.js"></script>
+    <script>
+      const rowsEl = document.getElementById("rows");
+
+      function addRow(name = "", score = "", weight = "") {
+        const row = document.createElement("div");
+        row.className = "grade-row";
+        row.innerHTML = `
+          <input type="text" placeholder="Homework" value="${name}" oninput="calc()" />
+          <input type="number" placeholder="90" value="${score}" oninput="calc()" />
+          <input type="number" placeholder="20" value="${weight}" oninput="calc()" />
+          <button onclick="this.parentElement.remove(); calc();">✕</button>
+        `;
+        rowsEl.appendChild(row);
+      }
+
+      function calc() {
+        const rows = rowsEl.querySelectorAll(".grade-row");
+        let totalWeighted = 0, totalWeight = 0;
+        rows.forEach((row) => {
+          const inputs = row.querySelectorAll("input[type=number]");
+          const score = parseFloat(inputs[0].value);
+          const weight = parseFloat(inputs[1].value);
+          if (!Number.isNaN(score) && !Number.isNaN(weight)) {
+            totalWeighted += score * weight;
+            totalWeight += weight;
+          }
+        });
+        const result = document.getElementById("result");
+        if (totalWeight === 0) {
+          result.textContent = "--";
+          return;
+        }
+        const grade = totalWeighted / totalWeight;
+        result.textContent = `Grade: ${grade.toFixed(2)}%`;
+      }
+
+      addRow("Homework", 90, 20);
+      addRow("Midterm", 85, 30);
+      addRow("Final", 88, 50);
+      calc();
+    </script>
+  </body>
+</html>
